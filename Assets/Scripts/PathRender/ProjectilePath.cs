@@ -40,14 +40,16 @@ public class ProjectilePath
 		}
 		else
 		{
-			Vector3 direction = endPoint - startPoint;
-			direction.y = 0;
-			float distance = direction.magnitude;
-			float radianAngle = angle * Mathf.Deg2Rad;
-			direction.y = distance * Mathf.Tan(radianAngle);
-			float velocity = Mathf.Sqrt(distance * Physics.gravity.magnitude / Mathf.Sin(2 * radianAngle));
-			return velocity * direction.normalized;
-		}
+            Vector3 direction = endPoint - startPoint;
+            direction.y = 0;
+            float distance = direction.magnitude;
+            float radianAngle = angle * Mathf.Deg2Rad;
+            direction.y = distance * Mathf.Tan(radianAngle);
+            float velocity = Mathf.Sqrt(distance * Physics.gravity.magnitude / Mathf.Sin(2 * radianAngle));
+            return velocity * direction.normalized;
+          
+
+        }
 	}
 
 

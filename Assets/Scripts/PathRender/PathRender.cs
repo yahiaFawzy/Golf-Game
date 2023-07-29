@@ -6,18 +6,23 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class PathRender : MonoBehaviour
 {
+    [SerializeField] GameObject headOfLine;
     public LineRenderer lineRenderer;
     public int resolution = 10;
+
+
 
     public void DrawProjectilePath(Vector3 startPoint, Vector3 endPoint, float angle)
     {
         lineRenderer.enabled = true;
+
 
         if (angle == 0)
         {
             lineRenderer.positionCount = 2;
             lineRenderer.SetPosition(0, startPoint);
             lineRenderer.SetPosition(1, endPoint);
+            headOfLine.SetActive(false);
         }
         else
         {
@@ -31,18 +36,39 @@ public class PathRender : MonoBehaviour
             {
                 float time = i * timeDelta;
                 Vector3 point = startPoint + velocity * time + 0.5f * Physics.gravity * time * time;
-                lineRenderer.SetPosition(i, point);
+                lineRenderer.SetPosition(i, point);       
             }
+
+            DrawHeadOfLine(lineRenderer.GetPosition(resolution-2),lineRenderer.GetPosition(resolution-1));          
+
         }
     }
 
-
     
 
-    internal void HidePath(Vector3 startPoint)
+    private void DrawHeadOfLine(Vector3 startPoint,Vector3 endPoint)
     {
-      
-            lineRenderer.enabled = false;
-        
+        headOfLine.SetActive(true);
+
+        RaycastHit raycastHit;
+        Vector3 direction  = endPoint - startPoint;
+        bool hit = Physics.Raycast(endPoint-direction*10 , direction , out raycastHit,200);
+
+        if (hit)
+        {
+            
+            headOfLine.transform.position = raycastHit.point;
+            Debug.Log("hit");
+        }
+        else
+        {
+            Debug.Log("no hit");
+            headOfLine.transform.position = endPoint;
+        }
+    }
+
+    internal void HidePath()
+    {
+        lineRenderer.enabled = false;        
     }
 }

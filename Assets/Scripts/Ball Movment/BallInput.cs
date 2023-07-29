@@ -37,10 +37,11 @@ public class BallInput : MonoBehaviour
     private Vector3 ScreenToWorld(Vector3 screenPosition)
     {       
         var pos =   mainCamera.ScreenToWorldPoint(screenPosition);
-        pos.y = transform.position.y;
+        pos.y = ball.transform.position.y;
         return pos;
         
     }
+
     private bool isClickedOn
     {
         get
@@ -57,12 +58,17 @@ public class BallInput : MonoBehaviour
 
 
     Vector3 worldPoint;
+    [SerializeField] GameObject ball;
 
     private void Awake()
     {
         mainCamera = Camera.main;
     }
 
+    private void FixedUpdate()
+    {
+        transform.position = ball.transform.position+Vector3.up*0.5f;
+    }
 
     private void OnDisable()
     {
@@ -73,7 +79,7 @@ public class BallInput : MonoBehaviour
     private IEnumerator Drag()
     {
         isDragging = true;
-        dragStartPositionWorld = transform.position;
+        dragStartPositionWorld = ball.transform.position;
         // grab
         while (isDragging)
         {
@@ -90,9 +96,16 @@ public class BallInput : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            worldPoint = hit.point;
-            worldPoint.y = transform.position.y;
-            OnDragAction.Invoke(worldPoint);           
+            if (hit.collider.gameObject != this)
+            {
+                worldPoint = hit.point;
+                worldPoint.y = ball.transform.position.y;
+                OnDragAction.Invoke(worldPoint);
+            }
+            else
+            {
+                //drag canceled
+            }
         }
     }
 
@@ -101,9 +114,15 @@ public class BallInput : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            worldPoint = hit.point;
-            worldPoint.y = transform.position.y;
-            OnEndDragAction.Invoke(worldPoint);
+            if (hit.collider.gameObject != gameObject)
+            {
+                worldPoint = hit.point;
+                worldPoint.y = ball.transform.position.y;
+                OnEndDragAction.Invoke(worldPoint);
+            }
+            else { 
+              //drag canceled
+            }
         }
 
     }

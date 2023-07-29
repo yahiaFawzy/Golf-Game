@@ -5,13 +5,12 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Ball : MonoBehaviour
 {
-    [SerializeField] int MaxHeigh = 10;
-    BallInput _ballInput;
+    [SerializeField] BallInput _ballInput;
     Rigidbody _rigidbody;
     PathRender _pathRender;
     [SerializeField] Transform debugCube;
     [SerializeField] PhysicMaterial physicMaterial;
-
+    [SerializeField] float shootScale=3;
     Vector3 prevuiosPoint;
     Vector3 target;
     float distanceToTarget;
@@ -20,9 +19,8 @@ public class Ball : MonoBehaviour
 
     void Awake()
     {
-        Physics.gravity = new Vector3(0,-18f,0); 
+        Physics.gravity = new Vector3(0,-25,0); 
 
-        _ballInput = GetComponent<BallInput>();
         _rigidbody = GetComponent<Rigidbody>();
         _pathRender = GetComponent<PathRender>();
 
@@ -34,35 +32,67 @@ public class Ball : MonoBehaviour
     {
         if (Vector2.Distance(transform.position, prevuiosPoint) > distanceToTarget)
         {            
-            _rigidbody.angularDrag = Mathf.Lerp(_rigidbody.angularDrag,20,0.0125f);
+            _rigidbody.angularDrag = Mathf.Lerp(_rigidbody.angularDrag,20,0.0125f*3);
         }
         else {
             _rigidbody.angularDrag = 0;
         }
+
+        if (_rigidbody.velocity.magnitude < 1 && _rigidbody.angularVelocity.magnitude < 1)
+        {
+            if (!_ballInput.gameObject.activeInHierarchy) {
+                _ballInput.gameObject.SetActive(true);
+            } 
+        }
+        else {
+            if (_ballInput.gameObject.activeInHierarchy)
+            {
+              _ballInput.gameObject.SetActive(false);        
+            }
+        }
+
     }
 
 
     private void OnDragEnd(Vector3 dragPoint)
     {
         prevuiosPoint = transform.position;
-      
-        target = (transform.position - dragPoint) * 2 + transform.position;
 
+        Vector3 pos = transform.position;
+        pos.y = dragPoint.y;
+        target = (pos - dragPoint) * shootScale + pos;
+        RaycastHit hit;
+        if (Physics.Raycast(target + Vector3.up * 5, Vector3.down, out hit, 15))
+        {
+
+            target.y = hit.point.y;
+
+        }
         distanceToTarget = Vector2.Distance(transform.position,target);
 
         var vel = ProjectilePath.CalculateProjectileVelocity(transform.position, target, (int)RocetManager.Instance.rocet);
 
         _rigidbody.velocity = vel;
 
-        _pathRender.HidePath(transform.position);
+        _pathRender.HidePath();
     }
 
 
     private void OnDrag(Vector3 dragPoint)
     {
-        target = (transform.position - dragPoint) * 2 +transform.position;
-        debugCube.position = target;
-        _pathRender.DrawProjectilePath(transform.position, target, (int)RocetManager.Instance.rocet);
+        Vector3 position = transform.position;
+        target = (position - dragPoint) * shootScale + position;
+
+        RaycastHit hit;
+        if (Physics.Raycast(target+Vector3.up*5,Vector3.down, out hit,15))
+        {
+
+            target.y = hit.point.y;
+           
+        }
+
+          debugCube.position = target;
+          _pathRender.DrawProjectilePath(transform.position, target, (int)RocetManager.Instance.rocet);
     }
 
  
